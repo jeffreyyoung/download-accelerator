@@ -1,7 +1,7 @@
 import argparse
 import requests
 import threading
-
+import time
 
 class DownloadRangeThread(threading.Thread):
     def __init__(self, url, lowerBound, upperBound):
@@ -17,10 +17,9 @@ class DownloadRangeThread(threading.Thread):
 		r = requests.get(self.url, headers = headers)
 		#r = requests.get(url)
 		self.content = r.content
-		print("--------------- -- -- -- -- -- -- -- - - - ---")
 
 class DownloadAccelerator:
-	def __init__(self, threads):
+	def __init__(self):
 		args = self.parse_args()
 		self.stringValues = [None] * args.t
 		print(self.stringValues)
@@ -33,8 +32,14 @@ class DownloadAccelerator:
 		return parser.parse_args()
 
 	def download_file(self, url, threads):
+		start_time=time.time()
+
 		r = requests.head(url)
-		length = int(r.headers["content-length"])
+ 
+		try:
+			length = int(r.headers["content-length"])
+		except:
+			sys.exit("Requested url did not provide content-length header")
 		print("length: " + str(length))
 
 		threadList = []
@@ -63,10 +68,10 @@ class DownloadAccelerator:
 			t.join()
 
 		filename = "index.html";
-		if(url.endswith("\\")):
+		if(url.endswith("/")):
 			filename = "index.html"
 		else:
-			words = url.split("\\")
+			words = url.split("/")
 			filename = words[-1]
 
 		with open(filename, 'wb') as f:
@@ -75,8 +80,9 @@ class DownloadAccelerator:
 			for t in threadList:
 				f.write(t.content)
 
+		seconds = time.time()-start_time
 
+		output = url + " " + str(threads) + " " + str(length) + " " + str(seconds) 
+		print(output)
 
-		print('done')	
-
-da = DownloadAccelerator(10)
+da = DownloadAccelerator()
