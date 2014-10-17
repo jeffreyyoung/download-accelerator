@@ -21,11 +21,11 @@ class DownloadRangeThread(threading.Thread):
 class DownloadAccelerator:
 	def __init__(self):
 		args = self.parse_args()
-		self.download_file(args.url, args.t)
+		self.download_file(args.url, args.n)
 
 	def parse_args(self):
 		parser = argparse.ArgumentParser()
-		parser.add_argument('-t', type = int, help='Number of threads', default=10 )
+		parser.add_argument('-n', type = int, help='Number of threads', default=10 )
 		parser.add_argument("url", help="url")
 		return parser.parse_args()
 
