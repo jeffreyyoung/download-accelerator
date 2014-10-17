@@ -2,6 +2,7 @@ import argparse
 import requests
 import threading
 import time
+import sys
 
 class DownloadRangeThread(threading.Thread):
     def __init__(self, url, lowerBound, upperBound):
@@ -12,7 +13,7 @@ class DownloadRangeThread(threading.Thread):
 
     def run(self):
 		byteRange = "bytes=" + str(self.lowerBound) + "-" + str(self.upperBound)
-		print byteRange
+		#print byteRange
 		headers = {"Range" : byteRange, "Cache-Control" : "no-cache, no-store, must-revalidate"}
 		r = requests.get(self.url, headers = headers)
 		#r = requests.get(url)
@@ -22,7 +23,6 @@ class DownloadAccelerator:
 	def __init__(self):
 		args = self.parse_args()
 		self.stringValues = [None] * args.t
-		print(self.stringValues)
 		self.download_file(args.url, args.t)
 
 	def parse_args(self):
@@ -40,7 +40,7 @@ class DownloadAccelerator:
 			length = int(r.headers["content-length"])
 		except:
 			sys.exit("Requested url did not provide content-length header")
-		print("length: " + str(length))
+		#print("length: " + str(length))
 
 		threadList = []
 		increment = length//threads
@@ -55,14 +55,12 @@ class DownloadAccelerator:
 
 			print(i,": ", lowerBound, upperBound)
 
-			#download chunk
 			threadList.append(DownloadRangeThread(url, lowerBound, upperBound))
 
 			lowerBound = upperBound + 1
 
 		for t in threadList:
 			t.start()
-
 
 		for t in threadList:
 			t.join()
