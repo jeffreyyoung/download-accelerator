@@ -16,13 +16,11 @@ class DownloadRangeThread(threading.Thread):
 		#print byteRange
 		headers = {"Range" : byteRange, "Cache-Control" : "no-cache, no-store, must-revalidate"}
 		r = requests.get(self.url, headers = headers)
-		#r = requests.get(url)
 		self.content = r.content
 
 class DownloadAccelerator:
 	def __init__(self):
 		args = self.parse_args()
-		self.stringValues = [None] * args.t
 		self.download_file(args.url, args.t)
 
 	def parse_args(self):
@@ -33,7 +31,6 @@ class DownloadAccelerator:
 
 	def download_file(self, url, threads):
 		start_time=time.time()
-
 		r = requests.head(url)
  
 		try:
@@ -47,16 +44,15 @@ class DownloadAccelerator:
 
 		lowerBound = 0;
 		upperBound = 0;
+
 		for i in range(0, threads):
+
 			if ( i != threads - 1):
 				upperBound = lowerBound + increment - 1;
 			else:
 				upperBound = length;
 
-			print(i,": ", lowerBound, upperBound)
-
 			threadList.append(DownloadRangeThread(url, lowerBound, upperBound))
-
 			lowerBound = upperBound + 1
 
 		for t in threadList:
@@ -66,9 +62,8 @@ class DownloadAccelerator:
 			t.join()
 
 		filename = "index.html";
-		if(url.endswith("/")):
-			filename = "index.html"
-		else:
+
+		if(not url.endswith("/")):
 			words = url.split("/")
 			filename = words[-1]
 
